@@ -18,6 +18,8 @@ class Controller implements ActionListener, MouseListener, KeyListener {
     private boolean keyRight;
     private boolean keyUp;
     private boolean keyDown;
+    private boolean editMode;
+    private boolean addMapItem;
 
     public Controller(Model m) {
         model = m;
@@ -25,10 +27,11 @@ class Controller implements ActionListener, MouseListener, KeyListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        view.removeButton();
+//        view.removeButton();
     }
 
     public boolean update() {
+        /*
         if (keyRight)
             //call a method in model that sets the turtle's
             model.setTurtleDestination(model.getTurtleX() + 10, model.getTurtleY());
@@ -48,6 +51,7 @@ class Controller implements ActionListener, MouseListener, KeyListener {
         //the Controller keeps track of whether or not we have
         //quit the program and returns this value to the Game
         //engine of whether or not to continue the game loop
+         */
         return keepGoing;
     }
 
@@ -57,7 +61,26 @@ class Controller implements ActionListener, MouseListener, KeyListener {
     }
 
     public void mousePressed(MouseEvent e) {
-        model.setTurtleDestination(e.getX(), e.getY());
+//        model.setTurtleDestination(e.getX(), e.getY());
+        //Snap to grid logic
+        if (editMode) {
+            // Screen cords
+            int mouseX = e.getX();
+            int screenY = e.getY();
+            // screen cords -> world cords
+            int worldY = screenY + view.getScroll();
+
+            //Snapping mouse to grid
+            int snapX = Math.floorDiv(mouseX, Tile.TILE_WIDTH) * Tile.TILE_WIDTH;
+            int snapY = Math.floorDiv(worldY, Tile.TILE_HEIGHT) * Tile.TILE_HEIGHT;
+
+
+            if (addMapItem) {
+                model.addTile(snapX, snapY); //Add tile
+            } else {
+                model.removeTile(snapX, snapY); //Remove tileaa
+            }
+        }
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -105,16 +128,53 @@ class Controller implements ActionListener, MouseListener, KeyListener {
                 break;
             case KeyEvent.VK_ESCAPE:
                 keepGoing = false;
+                break;
+            case KeyEvent.VK_Q: //Quit by pressing q
+                keepGoing = false;
+                break;
+            case KeyEvent.VK_E:
+                editMode = !editMode;
+                view.setEditMode();
+                break;
+            case KeyEvent.VK_C: // clearing map
+                if (editMode) {model.clearMap();}
+                break;
+            case KeyEvent.VK_A:
+                if (editMode) {
+                    addMapItem = true; // Set mode to Add
+                    view.setAddMapItem(true);
+                }
+                break;
+            case KeyEvent.VK_R:
+                if (editMode) {
+                    addMapItem = false; // Set mode to Remove
+                    view.setAddMapItem(false);
+                }
+                    break;
+            case KeyEvent.VK_8:
+                //moveup
+                view.setScroll(view.getScroll() - Tile.TILE_HEIGHT);
+                break;
+            case KeyEvent.VK_2:
+                //move down
+                view.setScroll(view.getScroll() + Tile.TILE_HEIGHT);
+                break;
         }
         char c = Character.toLowerCase(e.getKeyChar());
         if (c == 'q')
             keepGoing = false;
+        else if (c == 's') {
+            Json savemap = model.marshal();
+            savemap.save("map.json");
+            System.out.println("Map saved to map.json");
+        }
+        else if (c == 'l') {
+            Json loadmap = Json.load("map.json");
+            model.unmarshal(loadmap);
+            System.out.println("Map loaded");
+        }
     }
 
     public void keyTyped(KeyEvent e) {
     }
 }
-
-
-
-

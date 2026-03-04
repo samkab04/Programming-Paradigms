@@ -18,7 +18,7 @@ public class Game extends JFrame {
         view = new View(controller, model);
         keepGoing = true;
         view.addMouseListener(controller);
-        this.setTitle("Turtle wars!");  // Application name
+        this.setTitle("A2 - Map Editor");  // Application name
         this.setSize(500, 500);
         this.setFocusable(true);
         this.getContentPane().add(view);
@@ -31,6 +31,8 @@ public class Game extends JFrame {
         Game g = new Game();
         g.run();
     }
+
+
 
     public void run()
     {

@@ -11,34 +11,76 @@ import java.io.IOException;
 import java.io.File;
 import javax.swing.JButton;
 import java.awt.Color;
+import java.util.ArrayList;
 
 public class View extends JPanel {
-    private final JButton b1;
+    //    private final JButton b1;
     private final Model model;
     private BufferedImage turtle_image;
+    private BufferedImage tile1_image;
+    private BufferedImage tile2_image;
+    public boolean editMode = false;
+    public boolean addMapItem = false;
+    private int scroll = 0;
 
     public View(Controller c, Model m) {
-        b1 = new JButton("something else. (I do not care what you change it to.)"); // button title
-        b1.addActionListener(c);
-        this.add(b1);
+//        b1 = new JButton("something else. (I do not care what you change it to.)"); // button title
+//        b1.addActionListener(c);
+//        this.add(b1);
         c.setView(this);
         model = m;
 
         try {
             this.turtle_image = ImageIO.read(new File("images/turtle.png"));
+            this.tile1_image = ImageIO.read(new File("images/tile1.png"));
+            this.tile2_image = ImageIO.read(new File("images/tile2.png"));
         } catch (Exception e) {
             e.printStackTrace(System.err);
             System.exit(1);
         }
     }
+    /*
+        public void removeButton() {
+            this.remove(b1);
+        }
+    */
+    public void paintComponent(Graphics g) {
+        g.setColor(new Color(14, 128, 0)); // Only works if put on the top
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        ArrayList<Tile> tiles = model.getTiles(); // Scrolling Method
+//        g.drawImage(this.turtle_image, model.getTurtleX(), model.getTurtleY(), null);
+        // Get to try to draw tiles
+        for (int i = 0; i < tiles.size(); i++){
+            Tile t = tiles.get(i);
+            g.drawImage(tile1_image, t.getTileX(), t.getTileY() - scroll, t.getTileW(), t.getTileH(), null);
+        }
 
-    public void removeButton() {
-        this.remove(b1);
+        if (editMode){
+            if (addMapItem) {
+                g.setColor(new Color(0, 255, 0, 100));
+                g.fillRect(0, 0, 100, 100); // 100x100 box in top left corner
+            } else {
+                g.setColor(new Color(255, 0, 0, 100));
+                g.fillRect(0, 0, 100, 100); // 100x100 box in top left corner
+            }
+            g.drawImage(this.tile1_image, 0, 0, null);
+        }
     }
 
-    public void paintComponent(Graphics g) {
-        g.setColor(new Color(254, 189, 149)); // Only works if put on the top
-        g.fillRect(0, 0, this.getWidth(), this.getHeight());
-        g.drawImage(this.turtle_image, model.getTurtleX(), model.getTurtleY(), null);
+    // Change scroll position
+    public void setScroll(int s){
+        this.scroll = s;
+    }
+
+    public int getScroll(){
+        return this.scroll;
+    }
+
+    public void setEditMode(){
+        editMode = !editMode;
+    }
+
+    public void setAddMapItem(boolean b) { //I looked everywhere and the only way I could find that made the remove function worek was using booleans
+        this.addMapItem = b;
     }
 }
