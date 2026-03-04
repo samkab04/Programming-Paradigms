@@ -1,112 +1,137 @@
 /*
 Samir Kabaou
 1/29/26
-Make a game that uses your mouse and keyboard to control a turtle using an MVC.
+Make a game that uses your mouse and keyboard to control a mspacman using an MVC.
 */
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Model
 {
-//    private final int turtleSpeed;
-//    private int turtleX;
-//    private int turtleY;
-//    private int turtleDestX;
-//    private int turtleDestY;
-private ArrayList<Tile> tiles; // member varible
-Tile tile;
+    private final int mspacmanSpeed;
+    private int mspacmanX;
+    private int mspacmanY;
+    private int mspacmanDestX;
+    private int mspacmanDestY;
+    private MsPacman msPacman;
+    private ArrayList<Tile> tiles; // member varible
+    Tile tile;
 
 
-
+    //Call for mspacman in model
     public Model()
     {
-//        turtleSpeed = 4; //speed
+        mspacmanSpeed = 4; //speed
         tiles = new ArrayList<Tile>(); // Model constructor
         /*
         // Arraylist
         Tile t = new Tile(400, 300, 50, 50); // added values for the width and height
         tiles.add(t);
          */
+        msPacman = new MsPacman();
+        msPacman.intializeVars();
+    }
+
+    public MsPacman getMsPacman(){
+        return msPacman;
     }
 
     public void update()
     {
-        /*
-        // Move the turtle
-        if(this.turtleX < this.turtleDestX) //right
-           turtleX += Math.min(turtleSpeed, turtleDestX - turtleX);
-           this.turtleX += turtleSpeed;
-       else if(this.turtleX > this.turtleDestX) //left
-          turtleX -= Math.min(turtleSpeed, turtleDestX + turtleX);
-//            this.turtleX -= turtleSpeed;
-        if(this.turtleY < this.turtleDestY) //up
-           turtleY += Math.min(turtleSpeed, turtleDestY - turtleY);
-//            this.turtleY += turtleSpeed;
-       else if(this.turtleY > this.turtleDestY) //down
-           turtleY -= Math.min(turtleSpeed, turtleDestY + turtleY);
-//            this.turtleY -= turtleSpeed;
-         */
-    }
-    /*
-    public void setTurtleDestination(int x, int y)
-    {
-        this.turtleDestX = x;
-        this.turtleDestY = y;
-    }
-     */
+        msPacman.setPreviousPosition(); // Always save before moving
 
-/*
-    public int getTurtleX()
-    {
-        return turtleX;
+        // Mspacman can move :)
+        if(msPacman.getX() < this.mspacmanDestX) { //right
+            msPacman.moveRight();
+        } else if(msPacman.getX() > this.mspacmanDestX) { //left
+            msPacman.moveLeft();
+        }
+
+        if(msPacman.getY() > this.mspacmanDestY) { //up
+            msPacman.moveUp();
+        } else if(msPacman.getY() < this.mspacmanDestY) { //down
+            msPacman.moveDown();
+        }
+
+        msPacman.update(); // screen wrapping
+
+        // Collision Detection
+        for(Tile t : tiles) {
+            if(detectCollisions(msPacman, t)) {
+                // System.out.println("There is a collisons!" + ++ numCollisions); // debug
+                msPacman.getOutOfTile(t); // Pushes her back 1 pixel
+            }
+        }
     }
 
-    public int getTurtleY()
-    {
-        return turtleY;
-    }
-*/
+    public int getMspacmanX() { return msPacman.getX(); }
+    public int getMspacmanY() { return msPacman.getY(); }
+
+// Detecting if the object is colliding anything
+private boolean detectCollisions(MsPacman p, Tile t){
+    //If her right side is to the right of the tiel left
+    if(p.getRight() < t.getLeft())
+        return false;
+    //if her left side is tot he right of the tile right
+    if(p.getLeft() > t.getRight())
+        return false;
+    //if her toes are above the tile
+    if(p.getBottom() < t.getTop())
+        return false;
+    //if her head is below the tile
+    if(p.getTop() > t.getBottom())
+        return false;
+    return true;
+}
+
+public void setMspacmanDestination(int x, int y)
+{
+    this.mspacmanDestX = x;
+    this.mspacmanDestY = y;
+}
 
 // getter for view->tiles
-    public ArrayList<Tile> getTiles()
-    {
-        return tiles;
-    }
+public ArrayList<Tile> getTiles()
+{
+    return tiles;
+}
 
-    public void addTile(int x, int y) // Adding a tile
-    {
-        for (int i = 0; i < tiles.size(); i++) {
-            Tile t = tiles.get(i);
-            if (t.getTileX() == x && t.getTileY() == y) {
-                return;
-            }
-        }
-        tiles.add(new Tile(x, y, Tile.TILE_WIDTH, Tile.TILE_HEIGHT)); // add the actual tile
-    }
-
-    //Clearing the map
-    public void clearMap()
-    {
-        tiles = new ArrayList<Tile>();
-    }
-
-    public void removeTile(int x, int y) {
-        // Find and remove tile at the specified grid position
-        for (int i = tiles.size() - 1; i >= 0; i--) {
-            Tile tile = tiles.get(i);
-            if (tile.getTileX() == x && tile.getTileY() == y) {
-                tiles.remove(i);
-                break; // Remove only one tile per click
-            }
+public void addTile(int x, int y) // Adding a tile
+{
+    for (int i = 0; i < tiles.size(); i++) {
+        Tile t = tiles.get(i);
+        if (t.getTileX() == x && t.getTileY() == y) {
+            return;
         }
     }
+    tiles.add(new Tile(x, y, Tile.TILE_WIDTH, Tile.TILE_HEIGHT)); // add the actual tile
+}
+
+//Clearing the map
+public void clearMap()
+{
+    tiles = new ArrayList<Tile>();
+}
+
+public void removeTile(int x, int y) {
+        Iterator<Tile> it = tiles.iterator();
+    // Find and remove tile at the specified grid position
+    while(it.hasNext()) {
+        Tile t = it.next();
+        if (t.getTileX() == x && t.getTileY() == y) {
+            it.remove(); // This is the safest way to remove while looping
+            break; // Remove only one tile per click
+        }
+    }
+}
 
 
-    //JSON stuff
-    public Json marshal(){
-        Json ob = Json.newObject();
-        Json tmpList = Json.newList();
-        ob.add("tiles", tmpList);
-        // Go though the entire Array list
+//JSON stuff
+public Json marshal(){
+    Json ob = Json.newObject();
+    Json tmpList = Json.newList();
+    ob.add("tiles", tmpList);
+    // Go though the entire Array list
     for(int i = 0; i < tiles.size(); i++){
         tmpList.add(tiles.get(i).marshal());
     }
@@ -114,11 +139,12 @@ Tile tile;
 }
 
 public void unmarshal(Json ob){
-        tiles.clear(); // claer array
-        Json tmpList = ob.get("tiles");
-        //rebuild tiles
+    tiles.clear(); // claer array
+    Json tmpList = ob.get("tiles");
+    //rebuild tiles
     for(int i = 0; i < tmpList.size(); i++){
         tiles.add(new Tile(tmpList.get(i)));
     }
 }
+
 }

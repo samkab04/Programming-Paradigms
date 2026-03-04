@@ -7,6 +7,11 @@ import javax.swing.JFrame;
 import java.awt.Toolkit;
 
 public class Game extends JFrame {
+    public static final int WINDOW_WIDTH = 500;
+    public static final int WINDOW_HEIGHT = 500;
+    public static final int WORLD_WIDTH = 500;
+    public static final int WORLD_HEIGHT = 500;
+
     private boolean keepGoing;
     private Model model;
     private Controller controller;
@@ -18,13 +23,15 @@ public class Game extends JFrame {
         view = new View(controller, model);
         keepGoing = true;
         view.addMouseListener(controller);
-        this.setTitle("A2 - Map Editor");  // Application name
+        this.setTitle("A3 - Collision Detection");  // Application name
         this.setSize(500, 500);
         this.setFocusable(true);
         this.getContentPane().add(view);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
         this.addKeyListener(controller);
+        this.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        controller.loadMap(); //loadmap
     }
 
     static void main(String[] args) {

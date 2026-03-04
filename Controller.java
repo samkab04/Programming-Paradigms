@@ -24,6 +24,10 @@ class Controller implements ActionListener, MouseListener, KeyListener {
     public Controller(Model m) {
         model = m;
         keepGoing = true;
+        keyRight = false;
+        keyLeft = false;
+        keyUp = false;
+        keyDown = false;
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -31,27 +35,27 @@ class Controller implements ActionListener, MouseListener, KeyListener {
     }
 
     public boolean update() {
-        /*
-        if (keyRight)
-            //call a method in model that sets the turtle's
-            model.setTurtleDestination(model.getTurtleX() + 10, model.getTurtleY());
-        //turtleDestination to turtleDestX++ or something
-        //using a provided variable...
-        if (keyLeft)
-            //call a method in model that sets the turtle's
-            model.setTurtleDestination(model.getTurtleX() - 10, model.getTurtleY());
-        //turtleDestination to turtleDestX--
-        if (keyDown)
-            //do the same for turtleDestY++
-            model.setTurtleDestination(model.getTurtleX(), model.getTurtleY() + 10);
-        if (keyUp)
-            //do the same for turtleDestY--
-            model.setTurtleDestination(model.getTurtleX(), model.getTurtleY() - 10);
+        if(!editMode) {
+            if (keyRight)
+                //call a method in model that sets the turtle's
+                model.setMspacmanDestination(model.getMspacmanX()+ 1000000000, model.getMspacmanY());
+            //mspacmanDestination to mspacmanDestX++ or something
+            //using a provided variable...
+            if (keyLeft)
+                //call a method in model that sets the turtle's
+                model.setMspacmanDestination(model.getMspacmanX() - 1000000000, model.getMspacmanY());
+            //turtleDestination to turtleDestX--
+            if (keyDown)
+                //do the same for turtleDestY++
+                model.setMspacmanDestination(model.getMspacmanX(), model.getMspacmanY() + 1000000000);
+            if (keyUp)
+                //do the same for turtleDestY--
+                model.setMspacmanDestination(model.getMspacmanX(), model.getMspacmanY() - 1000000000);
 
-        //the Controller keeps track of whether or not we have
-        //quit the program and returns this value to the Game
-        //engine of whether or not to continue the game loop
-         */
+            //the Controller keeps track of whether or not we have
+            //quit the program and returns this value to the Game
+            //engine of whether or not to continue the game loop
+        }
         return keepGoing;
     }
 
@@ -60,8 +64,14 @@ class Controller implements ActionListener, MouseListener, KeyListener {
 
     }
 
+    public void loadMap() {
+        Json loadmap = Json.load("map.json");
+        model.unmarshal(loadmap);
+        System.out.println("Map loaded");
+    }
+
     public void mousePressed(MouseEvent e) {
-//        model.setTurtleDestination(e.getX(), e.getY());
+//        model.setMspacmanDestination(e.getX(), e.getY());
         //Snap to grid logic
         if (editMode) {
             // Screen cords
@@ -93,9 +103,17 @@ class Controller implements ActionListener, MouseListener, KeyListener {
     }
 
     public void mouseClicked(MouseEvent e) {
+        if (e.getY() < 100) {
+            System.out.println("break here");
+        }
     }
 
     public void keyPressed(KeyEvent e) {
+        keyRight = false;
+        keyLeft = false;
+        keyUp = false;
+        keyDown = false;
+
         switch (e.getKeyCode()) {
             case KeyEvent.VK_RIGHT:
                 keyRight = true;
@@ -137,7 +155,9 @@ class Controller implements ActionListener, MouseListener, KeyListener {
                 view.setEditMode();
                 break;
             case KeyEvent.VK_C: // clearing map
-                if (editMode) {model.clearMap();}
+                if (editMode) {
+                    model.clearMap();
+                }
                 break;
             case KeyEvent.VK_A:
                 if (editMode) {
@@ -150,15 +170,15 @@ class Controller implements ActionListener, MouseListener, KeyListener {
                     addMapItem = false; // Set mode to Remove
                     view.setAddMapItem(false);
                 }
-                    break;
-            case KeyEvent.VK_8:
+                break;
+            /*case KeyEvent.VK_8:
                 //moveup
                 view.setScroll(view.getScroll() - Tile.TILE_HEIGHT);
                 break;
             case KeyEvent.VK_2:
                 //move down
                 view.setScroll(view.getScroll() + Tile.TILE_HEIGHT);
-                break;
+                break;*/
         }
         char c = Character.toLowerCase(e.getKeyChar());
         if (c == 'q')
@@ -167,11 +187,8 @@ class Controller implements ActionListener, MouseListener, KeyListener {
             Json savemap = model.marshal();
             savemap.save("map.json");
             System.out.println("Map saved to map.json");
-        }
-        else if (c == 'l') {
-            Json loadmap = Json.load("map.json");
-            model.unmarshal(loadmap);
-            System.out.println("Map loaded");
+        } else if (c == 'l') {
+            loadMap();
         }
     }
 
